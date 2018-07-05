@@ -19,7 +19,7 @@ type SQLConf struct {
 
 const (
 	DEFAULT_PGSQL_OPEN_STR = "user=postgres dbname=points sslmode=disable"
-	DEFAULT_MYSQL_OPEN_STR = "points/root/"
+	DEFAULT_MYSQL_OPEN_STR = "points/root/chirag"
 	DEFAULT_TEST_OPEN_STR  = "\"\""
 )
 
@@ -42,7 +42,7 @@ func sqlConfFromEnv() *SQLConf {
 // Returns the DefaultSQLConf if no config/geo.yml is found, or an error
 // if one arises during the process of parsing the configuration file.
 func GetSQLConf() (*SQLConf, error) {
-	return GetSQLConfFromFile("config/geo.yml")
+	return GetSQLConfFromFile(/*"config/geo.yml"*/"dbconf.yml")
 }
 
 // Attempts to read from the passed in filename and creates a SQLconf as described therin.

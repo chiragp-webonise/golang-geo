@@ -12,16 +12,16 @@ import (
 // Returns a pointer to a SQLMapper if successful, or an error
 // if there is an issue opening a database connection.
 func HandleWithSQL() (*SQLMapper, error) {
-	sqlConf, sqlConfErr := GetSQLConf()
+	SqlConf, sqlConfErr := GetSQLConf()
 	if sqlConfErr == nil {
-		s := &SQLMapper{conf: sqlConf}
+		s := &SQLMapper{Conf: SqlConf}
 
-		db, err := sql.Open(s.conf.driver, s.conf.openStr)
+		db, err := sql.Open(s.Conf.driver, s.Conf.openStr)
 		if err != nil {
 			panic(err)
 		}
 
-		s.sqlConn = db
+		s.SqlConn = db
 		return s, err
 	}
 

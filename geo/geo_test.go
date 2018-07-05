@@ -3,6 +3,7 @@ package geo
 import (
 	_ "database/sql"
 	"fmt"
+	"github.com/golang-geo/geo"
 	"github.com/erikstmartin/go-testdb"
 	"os"
 	"strconv"
@@ -21,25 +22,25 @@ func TestPointsWithinRadiusIntegration(t *testing.T) {
 		stubPointsWithinRadiusQueries()
 	}
 
-	s, sqlErr := HandleWithSQL()
+	s, sqlErr := geo.HandleWithSQL()
 
 	if sqlErr != nil {
 		t.Error("ERROR: %s", sqlErr)
 	}
 
 	// SFO
-	origin := &Point{37.619002, -122.37484}
+	origin := geo.NewPoint(37.619002, -122.37484)
 
 	// Straight North
 	bearing := 0.0
 
 	// Make a point that is 1 meter within the desired radius
 	in_point := origin.PointAtDistanceAndBearing(7.999, bearing)
-	s.sqlConn.Exec(fmt.Sprintf("INSERT INTO points(lat, lng) VALUES(%f, %f);", in_point.lat, in_point.lng))
+	s.SqlConn.Exec(fmt.Sprintf("INSERT INTO points(lat, lng) VALUES(%f, %f);", in_point.Lat, in_point.Lng))
 
 	// Make a point that is 1 meter outsied of the desired radius
 	out_point := origin.PointAtDistanceAndBearing(8.001, bearing)
-	s.sqlConn.Exec(fmt.Sprintf("INSERT INTO points(lat, lng) VALUES(%f, %f);", out_point.lat, out_point.lng))
+	s.SqlConn.Exec(fmt.Sprintf("INSERT INTO points(lat, lng) VALUES(%f, %f);", out_point.Lat, out_point.Lng))
 
 	// Should only get the first point
 	_, err := s.PointsWithinRadius(origin, 8)
@@ -65,8 +66,8 @@ func TestPointsWithinRadiusIntegration(t *testing.T) {
 // TODO Test Great Circle Distance
 // TODO Test Point At Distance And Bearing
 
-func FlushTestDB(s *SQLMapper) {
-	s.sqlConn.Exec("DELETE FROM points;")
+func FlushTestDB(s *geo.SQLMapper) {
+	s.SqlConn.Exec("DELETE FROM points;")
 }
 
 // Taken from: http://play.golang.org/p/cwJj8ZJUhl
@@ -77,9 +78,9 @@ func RoundFloat(x float64, prec int) float64 {
 }
 
 func stubPointsWithinRadiusQueries() {
-	insideRangeQuery := fmt.Sprintf("SELECT * FROM points a WHERE acos(sin(radians(37.619002)) * sin(radians(a.lat)) + cos(radians(37.619002)) * cos(radians(a.lat)) * cos(radians(a.lng) - radians(-122.374840))) * %f <= 8.000000", float64(EARTH_RADIUS))
+	insideRangeQuery := fmt.Sprintf("SELECT * FROM points a WHERE acos(sin(radians(37.619002)) * sin(radians(a.lat)) + cos(radians(37.619002)) * cos(radians(a.lat)) * cos(radians(a.lng) - radians(-122.374840))) * %f <= 8.000000", float64(geo.EARTH_RADIUS))
 	testdb.StubQuery(insideRangeQuery, nil)
 
-	outsideRangeQuery := fmt.Sprintf("SELECT * FROM points a WHERE acos(sin(radians(37.619002)) * sin(radians(a.lat)) + cos(radians(37.619002)) * cos(radians(a.lat)) * cos(radians(a.lng) - radians(-122.374840))) * %f <= 9.000000", float64(EARTH_RADIUS))
+	outsideRangeQuery := fmt.Sprintf("SELECT * FROM points a WHERE acos(sin(radians(37.619002)) * sin(radians(a.lat)) + cos(radians(37.619002)) * cos(radians(a.lat)) * cos(radians(a.lng) - radians(-122.374840))) * %f <= 9.000000", float64(geo.EARTH_RADIUS))
 	testdb.StubQuery(outsideRangeQuery, nil)
 }
